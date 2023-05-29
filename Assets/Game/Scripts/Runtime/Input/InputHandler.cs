@@ -1,0 +1,20 @@
+namespace AillieoTech.Game.Input
+{
+    using UnityEngine;
+
+    public class InputHandler : MonoBehaviour
+    {
+        private void Update()
+        {
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                RecallManager.Instance.AbortCurrentAbility();
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                RecallManager.Instance.TryCast();
+            }
+        }
+    }
+}
