@@ -15,7 +15,6 @@ namespace AillieoTech.Game.Views
         [SerializeField]
         private Image progressImage;
 
-
         private void OnEnable()
         {
             RecallManager.Instance.OnAbilityBegin += this.OnAbilityBegin;

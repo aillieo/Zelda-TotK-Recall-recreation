@@ -6,26 +6,15 @@ namespace AillieoTech.Game
     [RequireComponent(typeof(Rigidbody))]
     public class Recallable : MonoBehaviour
     {
+        private Rigidbody rigidbodyValue;
+        private State stateValue;
+
         public enum State
         {
             Forward = 0,
             Backward,
             Paused,
         }
-
-        private new Rigidbody rigidbody
-        {
-            get
-            {
-                if (this.rigidbodyValue == null)
-                {
-                    this.rigidbodyValue = this.GetComponent<Rigidbody>();
-                }
-                return this.rigidbodyValue;
-            }
-        }
-
-        private Rigidbody rigidbodyValue;
 
         public State state
         {
@@ -39,7 +28,19 @@ namespace AillieoTech.Game
                 }
             }
         }
-        private State stateValue;
+
+        private new Rigidbody rigidbody
+        {
+            get
+            {
+                if (this.rigidbodyValue == null)
+                {
+                    this.rigidbodyValue = this.GetComponent<Rigidbody>();
+                }
+
+                return this.rigidbodyValue;
+            }
+        }
 
         private void OnEnable()
         {
@@ -65,7 +66,7 @@ namespace AillieoTech.Game
                     break;
                 case State.Paused:
                     this.rigidbody.isKinematic = true;
-                    this.rigidbody.detectCollisions = false;
+                    this.rigidbody.detectCollisions = true;
                     break;
             }
         }

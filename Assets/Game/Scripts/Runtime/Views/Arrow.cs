@@ -13,7 +13,6 @@ namespace AillieoTech.Game.Views
 
         public void SetPositions(IEnumerable<Vector3> positions)
         {
-
         }
     }
 }

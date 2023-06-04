@@ -4,7 +4,7 @@ namespace AillieoTech.Game
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class RecallManager : MonoBehaviour
+    public class RecallManager
     {
         public const int maxFrameCount = 6000;
 
@@ -13,8 +13,23 @@ namespace AillieoTech.Game
         private readonly Dictionary<Recallable, Queue<FrameData>> managedRecallables = new Dictionary<Recallable, Queue<FrameData>>();
 
         private RecallAbility currentAbility;
+        private Recallable potentialTarget;
 
-        public event Action<Recallable> OnPreview;
+        private FixedUpdateRunner fixedUpdateRunner;
+
+        private RecallManager()
+        {
+            this.fixedUpdateRunner = new GameObject($"[{nameof(FixedUpdateRunner)}]").AddComponent<FixedUpdateRunner>();
+            this.fixedUpdateRunner.hideFlags |= HideFlags.HideInHierarchy;
+            UnityEngine.Object.DontDestroyOnLoad(this.fixedUpdateRunner);
+            this.fixedUpdateRunner.onFixedUpdate += this.FixedUpdate;
+        }
+
+        public event Action OnPreviewBegin;
+
+        public event Action<Recallable> OnPreviewTargetUpdate;
+
+        public event Action OnPreviewEnd;
 
         public event Action<RecallAbility> OnAbilityBegin;
 
@@ -28,67 +43,149 @@ namespace AillieoTech.Game
             {
                 if (instance == null)
                 {
-                    instance = new GameObject($"[{nameof(RecallManager)}]").AddComponent<RecallManager>();
-                    DontDestroyOnLoad(instance);
+                    instance = new RecallManager();
                 }
 
                 return instance;
             }
         }
 
-        public void Register(Recallable recallable)
-        {
-            this.managedRecallables.Add(recallable, new Queue<FrameData>());
-        }
+        public bool isReadyToCast { get; private set; } = false;
 
-        public void Unregister(Recallable recallable)
+        public bool BeginPreview()
         {
-            this.managedRecallables.Remove(recallable);
-        }
+            if (this.isReadyToCast)
+            {
+                return false;
+            }
 
-        public void TryCast()
-        {
             if (this.currentAbility != null)
             {
-                return;
+                return false;
             }
 
-            UnityEngine.Debug.Log("Cast!");
-            Camera cam = Camera.main;
-            Vector3 start = cam.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, cam.nearClipPlane));
-            Vector3 end = cam.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, cam.farClipPlane));
-            var hits = new RaycastHit[16];
-            var hitCount = Physics.RaycastNonAlloc(start, end - start, hits, 10000, LayerMask.GetMask("Recallable"), QueryTriggerInteraction.Ignore);
-            if (hitCount > 0)
+            this.InternalBeginPreview();
+
+            return true;
+        }
+
+        public bool TryCast()
+        {
+            if (!this.isReadyToCast)
             {
-                GameObject hit = hits[0].collider.gameObject;
-                UnityEngine.Debug.Log(hit.name);
-                if (hit.TryGetComponent<Recallable>(out Recallable recallable) && this.managedRecallables.TryGetValue(recallable, out Queue<FrameData> frames))
-                {
-                    var ability = new RecallAbility(recallable, frames);
-                    this.currentAbility = ability;
-                    frames.Clear();
-
-                    try
-                    {
-                        this.OnAbilityBegin?.Invoke(ability);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                }
+                return false;
             }
+
+            if (this.currentAbility != null)
+            {
+                return false;
+            }
+
+            Recallable currentTarget = this.potentialTarget;
+
+            this.InternalEndPreview();
+
+            if (currentTarget != null && this.managedRecallables.TryGetValue(currentTarget, out Queue<FrameData> frames))
+            {
+                var ability = new RecallAbility(currentTarget, frames);
+                this.currentAbility = ability;
+                frames.Clear();
+
+                try
+                {
+                    this.OnAbilityBegin?.Invoke(ability);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         public void AbortCurrentAbility()
         {
+            if (this.isReadyToCast)
+            {
+                this.InternalEndPreview();
+                return;
+            }
+
             if (this.currentAbility == null)
             {
                 return;
             }
 
             this.StopCurrentAbility();
+        }
+
+        internal void Register(Recallable recallable)
+        {
+            this.managedRecallables.Add(recallable, new Queue<FrameData>());
+        }
+
+        internal void Unregister(Recallable recallable)
+        {
+            this.managedRecallables.Remove(recallable);
+        }
+
+        internal bool TryGetFrames(Recallable recallable, List<FrameData> toFill)
+        {
+            if (this.managedRecallables.TryGetValue(recallable, out Queue<FrameData> frames))
+            {
+                toFill.AddRange(frames);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void InternalBeginPreview()
+        {
+            this.isReadyToCast = true;
+            this.OnPreviewBegin?.Invoke();
+
+            foreach (var pair in this.managedRecallables)
+            {
+                pair.Key.state = Recallable.State.Paused;
+            }
+        }
+
+        private void InternalEndPreview()
+        {
+            this.isReadyToCast = false;
+
+            foreach (var pair in this.managedRecallables)
+            {
+                pair.Key.state = Recallable.State.Forward;
+            }
+
+            this.OnPreviewEnd?.Invoke();
+
+            this.potentialTarget = null;
+        }
+
+        private Recallable FindTarget()
+        {
+            Camera cam = Camera.main;
+            Vector3 start = cam.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, cam.nearClipPlane));
+            Vector3 end = cam.ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, cam.farClipPlane));
+            var hits = new RaycastHit[16];
+            var hitCount = Physics.RaycastNonAlloc(start, end - start, hits, 10000, LayerMask.GetMask("Recallable"), QueryTriggerInteraction.Ignore);
+
+            if (hitCount > 0)
+            {
+                GameObject hit = hits[0].collider.gameObject;
+                if (hit.TryGetComponent<Recallable>(out Recallable recallable))
+                {
+                    return recallable;
+                }
+            }
+
+            return null;
         }
 
         private void StopCurrentAbility()
@@ -107,32 +204,37 @@ namespace AillieoTech.Game
             this.currentAbility = null;
         }
 
-        private void Awake()
-        {
-            if (instance != null && instance != this)
-            {
-                Destroy(this);
-            }
-        }
-
         private void FixedUpdate()
         {
-            foreach (var pair in this.managedRecallables)
+            if (this.isReadyToCast)
             {
-                Recallable recallable = pair.Key;
-                Queue<FrameData> frames = pair.Value;
+                Recallable oldTarget = this.potentialTarget;
+                this.potentialTarget = this.FindTarget();
 
-                switch (recallable.state)
+                if (this.potentialTarget != oldTarget)
                 {
-                    case Recallable.State.Forward:
-                        var frameData = new FrameData(recallable.transform);
-                        frames.Enqueue(frameData);
-                        while (frames.Count > maxFrameCount)
-                        {
-                            frames.Dequeue();
-                        }
+                    this.OnPreviewTargetUpdate?.Invoke(this.potentialTarget);
+                }
+            }
+            else
+            {
+                foreach (var pair in this.managedRecallables)
+                {
+                    Recallable recallable = pair.Key;
+                    Queue<FrameData> frames = pair.Value;
 
-                        break;
+                    switch (recallable.state)
+                    {
+                        case Recallable.State.Forward:
+                            var frameData = new FrameData(recallable.transform);
+                            frames.Enqueue(frameData);
+                            while (frames.Count > maxFrameCount)
+                            {
+                                frames.Dequeue();
+                            }
+
+                            break;
+                    }
                 }
             }
 

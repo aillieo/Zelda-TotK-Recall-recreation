@@ -30,7 +30,7 @@ namespace AillieoTech.Game.Input
             var vertical = Input.GetAxis("Vertical");
             this.moveDirection = new Vector2(horizontal, vertical);
 
-            this.moveDirection = this.moveDirection.normalized * this.moveSpeed * Time.deltaTime;
+            this.moveDirection = this.moveSpeed * Time.deltaTime * this.moveDirection.normalized;
             Vector3 motion = (this.transform.forward * this.moveDirection.y) + (this.transform.right * this.moveDirection.x);
 
             this.transform.position += motion;

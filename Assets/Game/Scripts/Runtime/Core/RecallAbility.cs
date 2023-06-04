@@ -4,9 +4,8 @@ namespace AillieoTech.Game
 
     public class RecallAbility
     {
-        private Stack<FrameData> frames = new Stack<FrameData>();
         public readonly Recallable recallable;
-        public int frameCount { get; private set; }
+        private readonly Stack<FrameData> frames = new Stack<FrameData>();
 
         public RecallAbility(Recallable target, IEnumerable<FrameData> rawFrames)
         {
@@ -18,6 +17,8 @@ namespace AillieoTech.Game
             this.recallable = target;
             this.recallable.state = Recallable.State.Backward;
         }
+
+        public int frameCount { get; private set; }
 
         public int Tick()
         {

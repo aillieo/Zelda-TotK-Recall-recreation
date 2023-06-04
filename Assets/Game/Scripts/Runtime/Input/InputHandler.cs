@@ -6,6 +6,11 @@ namespace AillieoTech.Game.Input
     {
         private void Update()
         {
+            if (Input.GetKey(KeyCode.C))
+            {
+                RecallManager.Instance.BeginPreview();
+            }
+
             if (Input.GetKey(KeyCode.Escape))
             {
                 RecallManager.Instance.AbortCurrentAbility();

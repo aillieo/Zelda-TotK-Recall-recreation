@@ -15,8 +15,7 @@ namespace AillieoTech.Game
 
         public void ApplyTo(Transform transform)
         {
-            transform.position = this.position;
-            transform.rotation = this.rotation;
+            transform.SetPositionAndRotation(this.position, this.rotation);
         }
     }
 }
