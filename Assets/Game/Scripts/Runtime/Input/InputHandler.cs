@@ -11,7 +11,7 @@ namespace AillieoTech.Game.Input
                 RecallManager.Instance.BeginPreview();
             }
 
-            if (Input.GetKey(KeyCode.Escape))
+            if (Input.GetKey(KeyCode.Q))
             {
                 RecallManager.Instance.AbortCurrentAbility();
             }

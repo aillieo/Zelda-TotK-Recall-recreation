@@ -7,7 +7,10 @@ namespace AillieoTech.Game
 
     public class SceneLogic : MonoBehaviour
     {
-        private Dictionary<int, float> timers = new Dictionary<int, float>();
+        private readonly Dictionary<int, float> timers = new Dictionary<int, float>();
+
+        private readonly HashSet<GameObject> managedObjects = new HashSet<GameObject>();
+        private readonly List<GameObject> removeBuffer = new List<GameObject>();
 
         [SerializeField]
         private Bounds spawnArea;
@@ -15,8 +18,8 @@ namespace AillieoTech.Game
         [SerializeField]
         private SpawnTask[] tasks;
 
-        private HashSet<GameObject> managedObjects = new HashSet<GameObject>();
-        private List<GameObject> removeBuffer = new List<GameObject>();
+        [SerializeField]
+        private int maxObjectCount;
 
         private void Update()
         {
@@ -26,7 +29,7 @@ namespace AillieoTech.Game
 
         private void ExecuteSpawnTasks()
         {
-            if (this.managedObjects.Count > 50)
+            if (this.managedObjects.Count > this.maxObjectCount)
             {
                 return;
             }
@@ -68,7 +71,7 @@ namespace AillieoTech.Game
         {
             foreach (var go in this.managedObjects)
             {
-                if (go.transform.position.y < -10000)
+                if (go.transform.position.y < -1000)
                 {
                     this.removeBuffer.Add(go);
                 }

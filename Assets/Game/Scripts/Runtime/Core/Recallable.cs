@@ -62,7 +62,7 @@ namespace AillieoTech.Game
                     break;
                 case State.Backward:
                     this.rigidbody.isKinematic = true;
-                    this.rigidbody.detectCollisions = false;
+                    this.rigidbody.detectCollisions = true;
                     break;
                 case State.Paused:
                     this.rigidbody.isKinematic = true;

@@ -87,9 +87,8 @@ namespace AillieoTech.Game
 
             if (currentTarget != null && this.managedRecallables.TryGetValue(currentTarget, out Queue<FrameData> frames))
             {
-                var ability = new RecallAbility(currentTarget, frames);
+                var ability = new RecallAbility(currentTarget);
                 this.currentAbility = ability;
-                frames.Clear();
 
                 try
                 {
@@ -100,6 +99,7 @@ namespace AillieoTech.Game
                     Debug.LogException(e);
                 }
 
+                frames.Clear();
                 return true;
             }
 
@@ -146,7 +146,14 @@ namespace AillieoTech.Game
         private void InternalBeginPreview()
         {
             this.isReadyToCast = true;
-            this.OnPreviewBegin?.Invoke();
+            try
+            {
+                this.OnPreviewBegin?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
 
             foreach (var pair in this.managedRecallables)
             {
@@ -163,7 +170,14 @@ namespace AillieoTech.Game
                 pair.Key.state = Recallable.State.Forward;
             }
 
-            this.OnPreviewEnd?.Invoke();
+            try
+            {
+                this.OnPreviewEnd?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
 
             this.potentialTarget = null;
         }
@@ -213,7 +227,14 @@ namespace AillieoTech.Game
 
                 if (this.potentialTarget != oldTarget)
                 {
-                    this.OnPreviewTargetUpdate?.Invoke(this.potentialTarget);
+                    try
+                    {
+                        this.OnPreviewTargetUpdate?.Invoke(this.potentialTarget);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
                 }
             }
             else

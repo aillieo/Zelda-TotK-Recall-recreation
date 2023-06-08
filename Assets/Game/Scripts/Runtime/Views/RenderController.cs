@@ -6,7 +6,9 @@ namespace AillieoTech.Game.Views
     public class RenderController : MonoBehaviour
     {
         [SerializeField]
-        private GameObject tracePrefab;
+        private Trace tracePrefab;
+
+        private Trace traceInstance;
 
         private void OnEnable()
         {
@@ -25,16 +27,33 @@ namespace AillieoTech.Game.Views
         private void OnPreviewBegin()
         {
             RecallRendererSwitch.Instance.enableScanning = true;
+            RecallRendererSwitch.Instance.enableHighlight = true;
+
+            if (this.traceInstance == null)
+            {
+                this.traceInstance = Instantiate<Trace>(this.tracePrefab);
+            }
+
+            this.traceInstance.LoadData(null);
         }
 
         private void OnPreviewTargetUpdate(Recallable recallable)
         {
-            Debug.Log(recallable);
+            this.traceInstance.LoadData(recallable);
         }
 
         private void OnPreviewEnd()
         {
             RecallRendererSwitch.Instance.enableScanning = false;
+            RecallRendererSwitch.Instance.enableHighlight = false;
+
+            if (this.traceInstance != null)
+            {
+                this.traceInstance.LoadData(null);
+
+                GameObject.Destroy(this.traceInstance.gameObject);
+                this.traceInstance = null;
+            }
         }
     }
 }

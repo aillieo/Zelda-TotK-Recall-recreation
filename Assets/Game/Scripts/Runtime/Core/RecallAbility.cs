@@ -7,9 +7,12 @@ namespace AillieoTech.Game
         public readonly Recallable recallable;
         private readonly Stack<FrameData> frames = new Stack<FrameData>();
 
-        public RecallAbility(Recallable target, IEnumerable<FrameData> rawFrames)
+        public RecallAbility(Recallable target)
         {
-            foreach (var fd in rawFrames)
+            var buffer = new List<FrameData>();
+            RecallManager.Instance.TryGetFrames(target, buffer);
+
+            foreach (var fd in buffer)
             {
                 this.frames.Push(fd);
             }
