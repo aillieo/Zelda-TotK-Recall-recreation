@@ -67,7 +67,7 @@ Shader "AillieoTech/Fading"
                 float s1 = step(distortedRadius, fadeValue);
                 float s2 = smoothstep(distortedRadius - 1.0, distortedRadius, fadeValue);
                 float circleValue = (s2 - s1);
-                float4 final = lerp(screenCol, _Color, circleValue);
+                float4 final = lerp(screenCol, _Color, distance * _Color.a);
                 return final;
             }
 

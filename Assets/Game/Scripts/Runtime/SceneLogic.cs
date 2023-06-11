@@ -29,6 +29,11 @@ namespace AillieoTech.Game
 
         private void ExecuteSpawnTasks()
         {
+            if (RecallManager.Instance.stage == AbilityStage.Previewing)
+            {
+                return;
+            }
+
             if (this.managedObjects.Count > this.maxObjectCount)
             {
                 return;

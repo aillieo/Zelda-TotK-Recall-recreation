@@ -8,7 +8,6 @@ Shader "AillieoTech/Scanning"
         _ScanLineWidth("ScanLineWidth", Range(0, 10)) = 1
         _ScanLineInterval("_ScanLineInterval", Range(1, 30)) = 30
         _ScanLightStrength("ScanLightStrength", float) = 1
-        _Radius("Radius", float) = 1
         _Distortion("Distortion", Range(0, 1)) = 0.1
     }
  
@@ -59,7 +58,6 @@ Shader "AillieoTech/Scanning"
             float _ScanLightStrength;
             float _DistortFactor;
             float3 _Center;
-            float _Radius;
             float _Distortion;
             CBUFFER_END
 
@@ -94,13 +92,17 @@ Shader "AillieoTech/Scanning"
 
                 float3 distVector = worldPos - _Center;
                 float distance = sqrt(distVector.x * distVector.x + distVector.z * distVector.z);
-                float scanValue = _Time.y * _ScanSpeed;
-                scanValue = fmod(distance + scanValue, _ScanLineInterval);
+                float scanValue = distance - _Time.y * _ScanSpeed;
+                scanValue = fmod(scanValue, _ScanLineInterval);
+                if (scanValue < 0)
+                {
+                    scanValue += _ScanLineInterval;
+                }
 
-                float distortedRadius = _Radius * (1.0 + _Distortion * noise);
+                float distortedRadius = _ScanLineInterval * (1 + _Distortion * noise) * 0.5;
                 float s1 = step(distortedRadius, scanValue);
                 float s2 = smoothstep(distortedRadius - _ScanLineWidth, distortedRadius, scanValue);
-                float circleValue = (s2 - s1);
+                float circleValue = (s2 - s1) * _ScanLineColor.a;
                 float4 final = lerp(screenCol, _ScanLineColor, circleValue);
                 return final;
             }

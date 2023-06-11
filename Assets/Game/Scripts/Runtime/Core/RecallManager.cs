@@ -4,9 +4,16 @@ namespace AillieoTech.Game
     using System.Collections.Generic;
     using UnityEngine;
 
+    public enum AbilityStage
+    {
+        Invalid = 0,
+        Previewing,
+        Casting,
+    }
+
     public class RecallManager
     {
-        public const int maxFrameCount = 6000;
+        public const int maxFrameCount = 1200;
 
         private static RecallManager instance;
 
@@ -17,6 +24,8 @@ namespace AillieoTech.Game
 
         private FixedUpdateRunner fixedUpdateRunner;
 
+        private bool isPreviewing = false;
+
         private RecallManager()
         {
             this.fixedUpdateRunner = new GameObject($"[{nameof(FixedUpdateRunner)}]").AddComponent<FixedUpdateRunner>();
@@ -25,7 +34,7 @@ namespace AillieoTech.Game
             this.fixedUpdateRunner.onFixedUpdate += this.FixedUpdate;
         }
 
-        public event Action OnPreviewBegin;
+        public event Action<IEnumerable<Recallable>> OnPreviewBegin;
 
         public event Action<Recallable> OnPreviewTargetUpdate;
 
@@ -50,16 +59,27 @@ namespace AillieoTech.Game
             }
         }
 
-        public bool isReadyToCast { get; private set; } = false;
+        public AbilityStage stage
+        {
+            get
+            {
+                if (this.isPreviewing)
+                {
+                    return AbilityStage.Previewing;
+                }
+
+                if (this.currentAbility != null)
+                {
+                    return AbilityStage.Casting;
+                }
+
+                return AbilityStage.Invalid;
+            }
+        }
 
         public bool BeginPreview()
         {
-            if (this.isReadyToCast)
-            {
-                return false;
-            }
-
-            if (this.currentAbility != null)
+            if (this.stage != AbilityStage.Invalid)
             {
                 return false;
             }
@@ -71,22 +91,17 @@ namespace AillieoTech.Game
 
         public bool TryCast()
         {
-            if (!this.isReadyToCast)
-            {
-                return false;
-            }
-
-            if (this.currentAbility != null)
+            if (this.stage != AbilityStage.Previewing)
             {
                 return false;
             }
 
             Recallable currentTarget = this.potentialTarget;
 
-            this.InternalEndPreview();
-
             if (currentTarget != null && this.managedRecallables.TryGetValue(currentTarget, out Queue<FrameData> frames))
             {
+                this.InternalEndPreview();
+
                 var ability = new RecallAbility(currentTarget);
                 this.currentAbility = ability;
 
@@ -108,7 +123,7 @@ namespace AillieoTech.Game
 
         public void AbortCurrentAbility()
         {
-            if (this.isReadyToCast)
+            if (this.isPreviewing)
             {
                 this.InternalEndPreview();
                 return;
@@ -145,10 +160,13 @@ namespace AillieoTech.Game
 
         private void InternalBeginPreview()
         {
-            this.isReadyToCast = true;
+            this.isPreviewing = true;
+            Physics.autoSimulation = false;
             try
             {
-                this.OnPreviewBegin?.Invoke();
+                var recallables = new List<Recallable>();
+                recallables.AddRange(this.managedRecallables.Keys);
+                this.OnPreviewBegin?.Invoke(recallables);
             }
             catch (Exception e)
             {
@@ -163,7 +181,8 @@ namespace AillieoTech.Game
 
         private void InternalEndPreview()
         {
-            this.isReadyToCast = false;
+            this.isPreviewing = false;
+            Physics.autoSimulation = true;
 
             foreach (var pair in this.managedRecallables)
             {
@@ -220,7 +239,7 @@ namespace AillieoTech.Game
 
         private void FixedUpdate()
         {
-            if (this.isReadyToCast)
+            if (this.isPreviewing)
             {
                 Recallable oldTarget = this.potentialTarget;
                 this.potentialTarget = this.FindTarget();

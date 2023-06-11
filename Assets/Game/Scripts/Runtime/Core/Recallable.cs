@@ -45,6 +45,7 @@ namespace AillieoTech.Game
         private void OnEnable()
         {
             RecallManager.Instance.Register(this);
+            this.OnStateChanged();
         }
 
         private void OnDisable()
@@ -65,8 +66,6 @@ namespace AillieoTech.Game
                     this.rigidbody.detectCollisions = true;
                     break;
                 case State.Paused:
-                    this.rigidbody.isKinematic = true;
-                    this.rigidbody.detectCollisions = true;
                     break;
             }
         }

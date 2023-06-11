@@ -4,8 +4,14 @@ namespace AillieoTech.Game.Input
 
     public class CameraController : MonoBehaviour
     {
-        public float moveSpeed = 10f;
-        public float rotSpeed = 3f;
+        [SerializeField]
+        private new Camera camera;
+
+        [SerializeField]
+        private float moveSpeed = 16f;
+
+        [SerializeField]
+        private float rotSpeed = 3f;
 
         private Vector2 moveDirection;
         private float rotationX = 0f;
@@ -14,8 +20,8 @@ namespace AillieoTech.Game.Input
         private void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            this.rotationX = this.transform.eulerAngles.y;
-            this.rotationY = this.transform.eulerAngles.x;
+            this.rotationX = this.camera.transform.eulerAngles.y;
+            this.rotationY = this.camera.transform.eulerAngles.x;
         }
 
         private void Update()
@@ -31,9 +37,9 @@ namespace AillieoTech.Game.Input
             this.moveDirection = new Vector2(horizontal, vertical);
 
             this.moveDirection = this.moveSpeed * Time.deltaTime * this.moveDirection.normalized;
-            Vector3 motion = (this.transform.forward * this.moveDirection.y) + (this.transform.right * this.moveDirection.x);
+            Vector3 motion = (this.camera.transform.forward * this.moveDirection.y) + (this.camera.transform.right * this.moveDirection.x);
 
-            this.transform.position += motion;
+            this.camera.transform.position += motion;
         }
 
         private void UpdateRotation()
@@ -42,7 +48,7 @@ namespace AillieoTech.Game.Input
             this.rotationY += Input.GetAxis("Mouse Y") * this.rotSpeed;
 
             this.rotationY = Mathf.Clamp(this.rotationY, -90f, 90f);
-            this.transform.localRotation = Quaternion.Euler(-this.rotationY, this.rotationX, 0f);
+            this.camera.transform.localRotation = Quaternion.Euler(-this.rotationY, this.rotationX, 0f);
         }
     }
 }
