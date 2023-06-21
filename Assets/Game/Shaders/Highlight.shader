@@ -47,7 +47,8 @@ Shader "AillieoTech/Highlight"
             float _Speed;
             CBUFFER_END
 
-            sampler2D _NoiseTex;
+            TEXTURE2D(_NoiseTex);
+            SAMPLER(sampler_NoiseTex);
 
             Varyings vert(Atributes v)
             {
@@ -61,7 +62,7 @@ Shader "AillieoTech/Highlight"
 
             half4 frag(Varyings i) : SV_Target
             {
-                float noise = tex2D(_NoiseTex, i.uv).r;
+                float noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, i.uv).r;
 
                 noise = pow(noise, 3);
 

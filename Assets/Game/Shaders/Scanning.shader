@@ -61,8 +61,10 @@ Shader "AillieoTech/Scanning"
             float _Distortion;
             CBUFFER_END
 
-            sampler2D _MainTex;
-            sampler2D _NoiseTex;
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+            TEXTURE2D(_NoiseTex);
+            SAMPLER(sampler_NoiseTex);
             TEXTURE2D(_CameraDepthTexture);
             SAMPLER(sampler_CameraDepthTexture);
 
@@ -84,8 +86,8 @@ Shader "AillieoTech/Scanning"
 
             float4 frag(Varyings i) : SV_Target
             {
-                float4 screenCol = tex2D(_MainTex, i.uv);
-                float noise = tex2D(_NoiseTex, i.uv).r;
+                float4 screenCol = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                float noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, i.uv).r;
                 float sceneRawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.uv);
                 float linear01Depth = Linear01Depth(sceneRawDepth, _ZBufferParams);
                 float3 worldPos = _WorldSpaceCameraPos.xyz + (linear01Depth)*i.viewRayWorld;

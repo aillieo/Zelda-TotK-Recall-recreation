@@ -633,6 +633,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailPrefab: {fileID: 4170824018732448208, guid: cfcbc3528ace49f4696a44f17f0789ff, type: 3}
+  outlineMat: {fileID: 0}
+  hightlightMat: {fileID: 2100000, guid: b440d1b19029d8743afa155d46d22ee7, type: 2}
+  litMat: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
 --- !u!114 &506144391
 MonoBehaviour:
   m_ObjectHideFlags: 0

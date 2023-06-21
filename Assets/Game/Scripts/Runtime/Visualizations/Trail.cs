@@ -22,7 +22,7 @@ namespace AillieoTech.Game.Views
         private Vector3[] rawPositions;
         private int rawPositionCount;
 
-        public void LoadData(Recallable recallable)
+        public void LoadData(Recallable recallable, bool showFullTrail)
         {
             this.ClearOldTraces();
 
@@ -35,14 +35,20 @@ namespace AillieoTech.Game.Views
                 var frames = new List<FrameData>();
                 RecallManager.Instance.TryGetFrames(recallable, frames);
 
-                this.arrowHead.transform.position = frames[0].position;
+                var startIndex = 0;
+                if (!showFullTrail)
+                {
+                    startIndex = Mathf.FloorToInt(frames.Count * 0.75f);
+                }
+
+                this.arrowHead.transform.position = frames[startIndex].position;
 
                 // update trail
-                this.rawPositions = new Vector3[frames.Count];
-                this.rawPositionCount = frames.Count;
-                for (var i = 0; i < frames.Count; i++)
+                this.rawPositionCount = frames.Count - startIndex;
+                this.rawPositions = new Vector3[this.rawPositionCount];
+                for (var i = startIndex; i < frames.Count; i++)
                 {
-                    this.rawPositions[i] = frames[i].position;
+                    this.rawPositions[i - startIndex] = frames[i].position;
                 }
 
                 this.arrowBody.positionCount = this.rawPositionCount;
@@ -50,19 +56,18 @@ namespace AillieoTech.Game.Views
                 this.arrowBody.Simplify(0.1f);
 
                 // update traces
-                var index = 0;
-                var distanceAccumulated = this.traceInterval;
-                Vector3 lastPosition = frames[0].position;
-                while (index < frames.Count)
+                var distanceAccumulated = 0f;
+                Vector3 lastPosition = frames[startIndex].position;
+                while (startIndex < frames.Count)
                 {
-                    FrameData frame = frames[index];
+                    FrameData frame = frames[startIndex];
                     Vector3 newPosition = frame.position;
                     var newDistance = Vector3.Distance(newPosition, lastPosition);
                     lastPosition = newPosition;
                     distanceAccumulated += newDistance;
                     if (distanceAccumulated < this.traceInterval)
                     {
-                        index++;
+                        startIndex++;
                         continue;
                     }
 
@@ -72,24 +77,24 @@ namespace AillieoTech.Game.Views
                     {
                         GameObject template = recallable.gameObject;
                         GameObject s = this.CreateTrace(template, frame, true);
-                        s.name = $"{recallable.name} {index}";
-                        this.traces.Push(new Trace(index, s));
+                        s.name = $"{recallable.name} {startIndex}";
+                        this.traces.Push(new Trace(startIndex, s));
                     }
                     else
                     {
                         Trace first = this.traces.Peek();
-                        if (first.index == index)
+                        if (first.index == startIndex)
                         {
                             continue;
                         }
 
                         GameObject template = first.gameObject;
                         GameObject s = this.CreateTrace(template, frame, false);
-                        s.name = $"{recallable.name} {index}";
-                        this.traces.Push(new Trace(index, s));
+                        s.name = $"{recallable.name} {startIndex}";
+                        this.traces.Push(new Trace(startIndex, s));
                     }
 
-                    index++;
+                    startIndex++;
                 }
             }
         }
@@ -138,7 +143,6 @@ namespace AillieoTech.Game.Views
                 Mesh mesh = this.CombineMeshes(template);
                 newGo.GetComponent<MeshFilter>().mesh = mesh;
                 newGo.transform.localScale = template.transform.localScale;
-                Utils.SetLayerRecursively(newGo, LayerMask.NameToLayer("Trail"));
             }
             else
             {

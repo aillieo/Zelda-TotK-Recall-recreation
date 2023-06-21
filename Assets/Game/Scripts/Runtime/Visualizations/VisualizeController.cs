@@ -14,6 +14,8 @@ namespace AillieoTech.Game.Views
 
         private RecallAbility abilityInstance;
 
+        private Recallable lastTargtPreview;
+
         private void OnEnable()
         {
             RecallRendererSwitch.Instance.enableScanning = false;
@@ -48,25 +50,35 @@ namespace AillieoTech.Game.Views
             foreach (var r in recallables)
             {
                 Trail trail = Instantiate<Trail>(this.trailPrefab);
-                trail.LoadData(r);
+                trail.LoadData(r, false);
                 this.trailInstances[r] = trail;
+
+                // todo change layer
             }
         }
 
         private void OnPreviewTargetUpdate(Recallable recallable)
         {
+            this.OnEndBeingPotentialTarget(this.lastTargtPreview);
+            this.OnBecomePotentialTarget(recallable);
+            this.lastTargtPreview = recallable;
         }
 
         private void OnPreviewEnd()
         {
+            this.OnEndBeingPotentialTarget(this.lastTargtPreview);
+            this.lastTargtPreview = null;
+
             RecallRendererSwitch.Instance.enableScanning = false;
             RecallRendererSwitch.Instance.enableHighlight = false;
 
             foreach (var pair in this.trailInstances)
             {
                 Trail trail = pair.Value;
-                trail.LoadData(null);
+                trail.LoadData(null, false);
                 GameObject.Destroy(trail.gameObject);
+
+                // todo change layer
             }
 
             this.trailInstances.Clear();
@@ -82,9 +94,11 @@ namespace AillieoTech.Game.Views
             if (!this.trailInstances.TryGetValue(ability.recallable, out Trail trail))
             {
                 trail = Instantiate<Trail>(this.trailPrefab);
-                trail.LoadData(ability.recallable);
+                trail.LoadData(ability.recallable, true);
                 this.trailInstances[ability.recallable] = trail;
             }
+
+            // todo change layer
         }
 
         private void OnAbilityEnd(RecallAbility ability)
@@ -96,10 +110,12 @@ namespace AillieoTech.Game.Views
 
             if (this.trailInstances.TryGetValue(ability.recallable, out Trail trail))
             {
-                trail.LoadData(null);
+                trail.LoadData(null, false);
                 GameObject.Destroy(trail.gameObject);
                 this.trailInstances.Remove(ability.recallable);
             }
+
+            // todo change layer
         }
 
         private void Update()
@@ -110,6 +126,32 @@ namespace AillieoTech.Game.Views
                 {
                     trail.Consume(this.abilityInstance.frameCount);
                 }
+            }
+        }
+
+        private void OnBecomePotentialTarget(Recallable recallable)
+        {
+            if (recallable != null)
+            {
+                if (this.trailInstances.TryGetValue(recallable, out Trail trail))
+                {
+                    trail.LoadData(recallable, true);
+                }
+
+                // todo change layer
+            }
+        }
+
+        private void OnEndBeingPotentialTarget(Recallable recallable)
+        {
+            if (recallable != null)
+            {
+                if (this.trailInstances.TryGetValue(recallable, out Trail trail))
+                {
+                    trail.LoadData(recallable, false);
+                }
+
+                // todo change layer
             }
         }
     }

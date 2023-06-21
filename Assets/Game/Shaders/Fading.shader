@@ -15,7 +15,7 @@ Shader "AillieoTech/Fading"
 
         Pass
         {
-            Blend one OneMinusSrcAlpha
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
 

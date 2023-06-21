@@ -6,33 +6,34 @@ namespace AillieoTech.Game.Rendering
     using UnityEngine.Rendering.Universal;
 
     [Serializable]
-    public class FadingSettings
+    public class OutlineSettings
     {
-        public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
+        public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
 
         public Material blitMaterial;
     }
 
-    internal class FadingPass : ScriptableRenderPass
+    internal class OutlinePass : ScriptableRenderPass
     {
-        private static readonly int temporaryRTId = Shader.PropertyToID("_TempRT");
-
-        private readonly FadingSettings settings;
+        private readonly OutlineSettings settings;
 
         private readonly string tag;
 
-        public FadingPass(FadingSettings settings)
+        private readonly int outlineMaskRTId = Shader.PropertyToID("_OutlineMaskRT");
+
+        public OutlinePass(OutlineSettings settings)
         {
             this.settings = settings;
-            this.tag = nameof(FadingPass);
+            this.tag = nameof(OutlinePass);
         }
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
-            RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-            blitTargetDescriptor.depthBufferBits = 0;
+            // RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+            // blitTargetDescriptor.depthBufferBits = 0;
+            // blitTargetDescriptor.colorFormat = RenderTextureFormat.R16;
 
-            cmd.GetTemporaryRT(temporaryRTId, blitTargetDescriptor, FilterMode.Bilinear);
+            // cmd.GetTemporaryRT(this.outlineMaskRTId, blitTargetDescriptor, FilterMode.Bilinear);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -40,11 +41,10 @@ namespace AillieoTech.Game.Rendering
             CommandBuffer cmd = CommandBufferPool.Get(this.tag);
 
             var renderer = renderingData.cameraData.renderer;
-            var source = renderer.cameraColorTarget;
-            var destination = new RenderTargetIdentifier(temporaryRTId);
+            var source = new RenderTargetIdentifier(this.outlineMaskRTId);
+            var destination = renderer.cameraColorTarget;
 
             this.Blit(cmd, source, destination, this.settings.blitMaterial);
-            this.Blit(cmd, destination, source);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
@@ -52,7 +52,7 @@ namespace AillieoTech.Game.Rendering
 
         public override void FrameCleanup(CommandBuffer cmd)
         {
-            cmd.ReleaseTemporaryRT(temporaryRTId);
+            cmd.ReleaseTemporaryRT(this.outlineMaskRTId);
         }
     }
 }

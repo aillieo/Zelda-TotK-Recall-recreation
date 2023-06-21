@@ -15,34 +15,33 @@ namespace AillieoTech.Game.Rendering
 
     internal class ScanningPass : ScriptableRenderPass
     {
-        public ScanningSettings settings;
+        private static readonly int temporaryRTId = Shader.PropertyToID("_TempRT");
 
-        private readonly string profilerTag;
+        private readonly ScanningSettings settings;
 
-        private readonly int temporaryRTId = Shader.PropertyToID("_TempRT");
+        private readonly string tag;
 
-        public ScanningPass(string tag)
+        public ScanningPass(ScanningSettings settings)
         {
-            this.profilerTag = tag;
+            this.settings = settings;
+            this.tag = nameof(ScanningPass);
         }
-
-        public FilterMode filterMode { get; set; }
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
             blitTargetDescriptor.depthBufferBits = 0;
 
-            cmd.GetTemporaryRT(this.temporaryRTId, blitTargetDescriptor, this.filterMode);
+            cmd.GetTemporaryRT(temporaryRTId, blitTargetDescriptor, FilterMode.Bilinear);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            CommandBuffer cmd = CommandBufferPool.Get(this.profilerTag);
+            CommandBuffer cmd = CommandBufferPool.Get(this.tag);
 
             var renderer = renderingData.cameraData.renderer;
             var source = renderer.cameraColorTarget;
-            var destination = new RenderTargetIdentifier(this.temporaryRTId);
+            var destination = new RenderTargetIdentifier(temporaryRTId);
 
             this.Blit(cmd, source, destination, this.settings.blitMaterial);
             this.Blit(cmd, destination, source);
@@ -53,7 +52,7 @@ namespace AillieoTech.Game.Rendering
 
         public override void FrameCleanup(CommandBuffer cmd)
         {
-            cmd.ReleaseTemporaryRT(this.temporaryRTId);
+            cmd.ReleaseTemporaryRT(temporaryRTId);
         }
     }
 }
