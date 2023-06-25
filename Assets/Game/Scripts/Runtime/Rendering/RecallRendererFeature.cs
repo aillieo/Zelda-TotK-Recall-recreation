@@ -37,7 +37,7 @@ namespace AillieoTech.Game.Rendering
                 renderer.EnqueuePass(this.scanningPass);
             }
 
-            if (RecallRendererSwitch.Instance.enableHighlight)
+            if (RecallRendererSwitch.Instance.enableOutline)
             {
                 this.outlineMaskPass.renderPassEvent = this.outlineMaskSettings.renderPassEvent;
                 renderer.EnqueuePass(this.outlineMaskPass);

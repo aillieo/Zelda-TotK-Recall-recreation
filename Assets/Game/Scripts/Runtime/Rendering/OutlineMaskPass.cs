@@ -11,9 +11,13 @@ namespace AillieoTech.Game.Rendering
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
 
         public LayerMask layerMask;
+
+        [RenderingLayerMask]
         public uint renderingLayerMask = 1;
 
         public Material overrideMaterial = null;
+
+        public int overrideMaterialPassIndex;
     }
 
     public class OutlineMaskPass : ScriptableRenderPass
@@ -26,7 +30,6 @@ namespace AillieoTech.Game.Rendering
             new ShaderTagId("LightweightForward"),
         };
 
-        private static readonly int outlineMaskRTId = Shader.PropertyToID("_OutlineMaskRT");
         private readonly string tag;
 
         private readonly OutlineMaskSettings settings;
@@ -46,7 +49,7 @@ namespace AillieoTech.Game.Rendering
             blitTargetDescriptor.depthBufferBits = 0;
             blitTargetDescriptor.colorFormat = RenderTextureFormat.R16;
 
-            cmd.GetTemporaryRT(outlineMaskRTId, blitTargetDescriptor, FilterMode.Bilinear);
+            cmd.GetTemporaryRT(Consts.outlineMaskRTId, blitTargetDescriptor, FilterMode.Point);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -55,14 +58,15 @@ namespace AillieoTech.Game.Rendering
 
             DrawingSettings drawingSettings = this.CreateDrawingSettings(shaderTagIdList, ref renderingData, sortingCriteria);
             drawingSettings.overrideMaterial = this.settings.overrideMaterial;
+            drawingSettings.overrideMaterialPassIndex = this.settings.overrideMaterialPassIndex;
 
             this.filteringSettings.layerMask = this.settings.layerMask;
             this.filteringSettings.renderingLayerMask = this.settings.renderingLayerMask;
 
             CommandBuffer cmd = CommandBufferPool.Get(this.tag);
 
-            var destination = new RenderTargetIdentifier(outlineMaskRTId);
-            var depthTexture = new RenderTargetIdentifier("_CameraDepthTexture");
+            var destination = new RenderTargetIdentifier(Consts.outlineMaskRTId);
+            var depthTexture = new RenderTargetIdentifier(Consts.depthTexId);
             cmd.SetRenderTarget(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, depthTexture, RenderBufferLoadAction.Load, RenderBufferStoreAction.DontCare);
             cmd.ClearRenderTarget(false, true, Color.clear);
 
@@ -73,11 +77,6 @@ namespace AillieoTech.Game.Rendering
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
-        }
-
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-            // cmd.ReleaseTemporaryRT(this.outlineMaskRTId);
         }
     }
 }

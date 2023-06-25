@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8185828516160247161}
   - component: {fileID: 3885192158310544388}
   - component: {fileID: 5629984551913765118}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: MeshRenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -56,11 +56,10 @@ MeshRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 145446175e377be48b405b24db2471df, type: 2}
-  - {fileID: 2100000, guid: 7dddac699d5493f4eb9474db09e1ddea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

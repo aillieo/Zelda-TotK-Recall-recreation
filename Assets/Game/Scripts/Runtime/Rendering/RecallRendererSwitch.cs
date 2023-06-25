@@ -8,6 +8,8 @@ namespace AillieoTech.Game.Rendering
 
         public bool enableFading = false;
 
+        public bool enableOutline = false;
+
         public bool enableHighlight = false;
     }
 }

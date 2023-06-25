@@ -15,8 +15,6 @@ namespace AillieoTech.Game.Rendering
 
     internal class FadingPass : ScriptableRenderPass
     {
-        private static readonly int temporaryRTId = Shader.PropertyToID("_TempRT");
-
         private readonly FadingSettings settings;
 
         private readonly string tag;
@@ -32,7 +30,7 @@ namespace AillieoTech.Game.Rendering
             RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
             blitTargetDescriptor.depthBufferBits = 0;
 
-            cmd.GetTemporaryRT(temporaryRTId, blitTargetDescriptor, FilterMode.Bilinear);
+            cmd.GetTemporaryRT(Consts.temporaryRTId, blitTargetDescriptor, FilterMode.Bilinear);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -41,7 +39,7 @@ namespace AillieoTech.Game.Rendering
 
             var renderer = renderingData.cameraData.renderer;
             var source = renderer.cameraColorTarget;
-            var destination = new RenderTargetIdentifier(temporaryRTId);
+            var destination = new RenderTargetIdentifier(Consts.temporaryRTId);
 
             this.Blit(cmd, source, destination, this.settings.blitMaterial);
             this.Blit(cmd, destination, source);
@@ -52,7 +50,7 @@ namespace AillieoTech.Game.Rendering
 
         public override void FrameCleanup(CommandBuffer cmd)
         {
-            cmd.ReleaseTemporaryRT(temporaryRTId);
+            cmd.ReleaseTemporaryRT(Consts.temporaryRTId);
         }
     }
 }

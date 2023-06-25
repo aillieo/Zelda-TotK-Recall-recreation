@@ -24,7 +24,7 @@ namespace AillieoTech.Game.Input
             this.rotationY = this.camera.transform.eulerAngles.x;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             this.UpdatePosition();
             this.UpdateRotation();

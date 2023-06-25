@@ -35,6 +35,11 @@ namespace AillieoTech.Game.Views
                 var frames = new List<FrameData>();
                 RecallManager.Instance.TryGetFrames(recallable, frames);
 
+                if (frames.Count == 0)
+                {
+                    return;
+                }
+
                 var startIndex = 0;
                 if (!showFullTrail)
                 {
