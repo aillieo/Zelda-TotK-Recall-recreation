@@ -11,12 +11,12 @@ Shader "AillieoTech/Highlight"
     SubShader
     {
 
-        // Tags {"Queue"="Geometry" "RenderType"="Opaque" "RenderPipeline"="UniversalRenderPipeline"}
-        Tags {"Queue"="Transparent" "RenderType"="Overlay" "RenderPipeline"="UniversalRenderPipeline"}
+        Tags {"RenderType"="Opaque" "RenderPipeline"="UniversalRenderPipeline"}
 
         Pass
         {
-            ZTest Always
+            ZTest LEqual
+            ZWrite Off
 
             Blend one OneMinusSrcAlpha
 
@@ -45,6 +45,7 @@ Shader "AillieoTech/Highlight"
             CBUFFER_START(UnityPerMaterial)
             float4 _Color;
             float _Speed;
+            half4 _NoiseTex_ST;
             CBUFFER_END
 
             TEXTURE2D(_NoiseTex);
@@ -53,7 +54,7 @@ Shader "AillieoTech/Highlight"
             Varyings vert(Atributes v)
             {
                 Varyings o = (Varyings)0;
-                o.uv = v.uv;
+                o.uv = TRANSFORM_TEX(v.uv, _NoiseTex);
                 o.positionOS = v.positionOS.xyz;
                 o.positionWS = TransformObjectToWorld(v.positionOS.xyz);
                 o.positionCS = TransformObjectToHClip(v.positionOS.xyz);

@@ -11,7 +11,7 @@ Shader "AillieoTech/Fading"
     SubShader
     {
 
-        Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Overlay" "Queue"="Transparent" "DisableBatching"="True" }
+        Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Overlay" "DisableBatching"="True" }
 
         Pass
         {
@@ -23,6 +23,9 @@ Shader "AillieoTech/Fading"
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            TEXTURE2D(_OutlineMaskRT);
+            SAMPLER(sampler_OutlineMaskRT);
 
             struct Atributes
             {
@@ -37,14 +40,15 @@ Shader "AillieoTech/Fading"
             };
             
             CBUFFER_START(UnityPerMaterial)
-            float4 _MainTex_ST;
             half4 _Color;
             float _FadeValue;
             float _Distortion;
             CBUFFER_END
 
-            sampler2D _MainTex;
-            sampler2D _NoiseTex;
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+            TEXTURE2D(_NoiseTex);
+            SAMPLER(sampler_NoiseTex);
 
             Varyings vert(Atributes v)
             {
@@ -56,18 +60,23 @@ Shader "AillieoTech/Fading"
 
             float4 frag(Varyings i) : SV_Target
             {
-                float4 screenCol = tex2D(_MainTex, i.uv);
-                float noise = tex2D(_NoiseTex, i.uv).r;
-                float2 distVector = i.uv - 0.5f;
-                half4 color = 0;
-                half2 symmetryUv = i.uv - 0.5;
-                half distance = length(symmetryUv);
+                if (SAMPLE_TEXTURE2D(_OutlineMaskRT, sampler_OutlineMaskRT, i.uv).r > 0)
+                {
+                    discard;
+                }
+
+                float4 screenCol = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                float noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, i.uv).r;
+                float2 distVector = (i.uv - 0.5f);
+                distVector.x *= (_ScreenParams.x / _ScreenParams.y);
+                half distance = length(distVector);
                 float fadeValue = _FadeValue;
-                float distortedRadius = 1.0 + _Distortion * noise;
+                float distortedRadius = distance + _Distortion * noise;
                 float s1 = step(distortedRadius, fadeValue);
-                float s2 = smoothstep(distortedRadius - 1.0, distortedRadius, fadeValue);
-                float circleValue = (s2 - s1);
-                float4 final = lerp(screenCol, _Color, distance * _Color.a);
+                float s2 = smoothstep(distortedRadius * 0.9f, distortedRadius, fadeValue);
+                float circleValue = (s2 - s1) + _Color.a * s1;
+                circleValue *= _Color.a;
+                float4 final = lerp(screenCol, _Color, circleValue);
                 return final;
             }
 

@@ -10,6 +10,10 @@ namespace AillieoTech.Game.Rendering
         private ScanningPass scanningPass;
 
         [SerializeField]
+        private HighlightSettings highlightSettings;
+        private HighlightPass highlightPass;
+
+        [SerializeField]
         private OutlineMaskSettings outlineMaskSettings;
         private OutlineMaskPass outlineMaskPass;
 
@@ -24,6 +28,7 @@ namespace AillieoTech.Game.Rendering
         public override void Create()
         {
             this.scanningPass = new ScanningPass(this.scanningSettings);
+            this.highlightPass = new HighlightPass(this.highlightSettings);
             this.outlineMaskPass = new OutlineMaskPass(this.outlineMaskSettings);
             this.outlinePass = new OutlinePass(this.outlineSettings);
             this.fadingPass = new FadingPass(this.fadingSettings);
@@ -35,6 +40,12 @@ namespace AillieoTech.Game.Rendering
             {
                 this.scanningPass.renderPassEvent = this.scanningSettings.renderPassEvent;
                 renderer.EnqueuePass(this.scanningPass);
+            }
+
+            if (RecallRendererSwitch.Instance.enableHighlight)
+            {
+                this.highlightPass.renderPassEvent = this.highlightSettings.renderPassEvent;
+                renderer.EnqueuePass(this.highlightPass);
             }
 
             if (RecallRendererSwitch.Instance.enableOutline)
@@ -49,6 +60,7 @@ namespace AillieoTech.Game.Rendering
             if (RecallRendererSwitch.Instance.enableFading)
             {
                 this.fadingPass.renderPassEvent = this.fadingSettings.renderPassEvent;
+                this.fadingPass.fadingPassTime = RecallRendererSwitch.Instance.fadingPassTime;
                 renderer.EnqueuePass(this.fadingPass);
             }
         }

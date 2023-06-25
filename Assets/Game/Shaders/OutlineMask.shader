@@ -31,11 +31,6 @@ Shader "AillieoTech/OutlineMask"
                 float4 positionCS : SV_POSITION;
             };
 
-            CBUFFER_START(UnityPerMaterial)
-            float4 _OutlineColor;
-            float _Outline;
-            CBUFFER_END
-
             Varyings vert (Atributes v)
             {
                 Varyings o = (Varyings)0;

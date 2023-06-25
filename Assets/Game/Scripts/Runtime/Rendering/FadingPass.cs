@@ -15,6 +15,8 @@ namespace AillieoTech.Game.Rendering
 
     internal class FadingPass : ScriptableRenderPass
     {
+        public float fadingPassTime = 0;
+
         private readonly FadingSettings settings;
 
         private readonly string tag;
@@ -41,8 +43,10 @@ namespace AillieoTech.Game.Rendering
             var source = renderer.cameraColorTarget;
             var destination = new RenderTargetIdentifier(Consts.temporaryRTId);
 
-            this.Blit(cmd, source, destination, this.settings.blitMaterial);
-            this.Blit(cmd, destination, source);
+            this.settings.blitMaterial.SetFloat("_FadeValue", this.fadingPassTime);
+
+            this.Blit(cmd, source, destination);
+            this.Blit(cmd, destination, source, this.settings.blitMaterial);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);

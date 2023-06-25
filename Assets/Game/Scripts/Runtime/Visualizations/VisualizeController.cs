@@ -19,6 +19,7 @@ namespace AillieoTech.Game.Views
         private void OnEnable()
         {
             RecallRendererSwitch.Instance.enableScanning = false;
+            RecallRendererSwitch.Instance.enableHighlight = false;
             RecallRendererSwitch.Instance.enableOutline = false;
             RecallRendererSwitch.Instance.enableFading = false;
 
@@ -32,6 +33,7 @@ namespace AillieoTech.Game.Views
         private void OnDisable()
         {
             RecallRendererSwitch.Instance.enableScanning = false;
+            RecallRendererSwitch.Instance.enableHighlight = false;
             RecallRendererSwitch.Instance.enableOutline = false;
             RecallRendererSwitch.Instance.enableFading = false;
 
@@ -45,6 +47,7 @@ namespace AillieoTech.Game.Views
         private void OnPreviewBegin(IEnumerable<Recallable> recallables)
         {
             RecallRendererSwitch.Instance.enableScanning = true;
+            RecallRendererSwitch.Instance.enableHighlight = true;
             RecallRendererSwitch.Instance.enableOutline = true;
 
             foreach (var r in recallables)
@@ -53,8 +56,8 @@ namespace AillieoTech.Game.Views
                 trail.LoadData(r, false);
                 this.trailInstances[r] = trail;
 
-                this.AddRenderingLayerMask(r.gameObject, Consts.outlineMask);
-                this.AddRenderingLayerMask(r.gameObject, Consts.highlightMask);
+                Utils.AddRenderingLayerMask(r.gameObject, Consts.outlineMask);
+                Utils.AddRenderingLayerMask(r.gameObject, Consts.highlightMask);
             }
         }
 
@@ -71,6 +74,7 @@ namespace AillieoTech.Game.Views
             this.lastTargtPreview = null;
 
             RecallRendererSwitch.Instance.enableScanning = false;
+            RecallRendererSwitch.Instance.enableHighlight = false;
             RecallRendererSwitch.Instance.enableOutline = false;
 
             foreach (var pair in this.trailInstances)
@@ -79,8 +83,8 @@ namespace AillieoTech.Game.Views
                 trail.LoadData(null, false);
                 GameObject.Destroy(trail.gameObject);
 
-                this.RemoveRenderingLayerMask(pair.Key.gameObject, Consts.outlineMask);
-                this.RemoveRenderingLayerMask(pair.Key.gameObject, Consts.highlightMask);
+                Utils.RemoveRenderingLayerMask(pair.Key.gameObject, Consts.outlineMask);
+                Utils.RemoveRenderingLayerMask(pair.Key.gameObject, Consts.highlightMask);
             }
 
             this.trailInstances.Clear();
@@ -93,6 +97,7 @@ namespace AillieoTech.Game.Views
 
             RecallRendererSwitch.Instance.enableOutline = true;
             RecallRendererSwitch.Instance.enableFading = true;
+            RecallRendererSwitch.Instance.fadingPassTime = 0f;
 
             if (!this.trailInstances.TryGetValue(ability.recallable, out Trail trail))
             {
@@ -101,7 +106,7 @@ namespace AillieoTech.Game.Views
                 this.trailInstances[ability.recallable] = trail;
             }
 
-            this.AddRenderingLayerMask(ability.recallable.gameObject, Consts.outlineMask);
+            Utils.AddRenderingLayerMask(ability.recallable.gameObject, Consts.outlineMask);
         }
 
         private void OnAbilityEnd(RecallAbility ability)
@@ -111,6 +116,7 @@ namespace AillieoTech.Game.Views
 
             RecallRendererSwitch.Instance.enableOutline = false;
             RecallRendererSwitch.Instance.enableFading = false;
+            RecallRendererSwitch.Instance.fadingPassTime = 0f;
 
             if (this.trailInstances.TryGetValue(ability.recallable, out Trail trail))
             {
@@ -119,13 +125,15 @@ namespace AillieoTech.Game.Views
                 this.trailInstances.Remove(ability.recallable);
             }
 
-            this.RemoveRenderingLayerMask(ability.recallable.gameObject, Consts.outlineMask);
+            Utils.RemoveRenderingLayerMask(ability.recallable.gameObject, Consts.outlineMask);
         }
 
         private void Update()
         {
             if (RecallManager.Instance.stage == AbilityStage.Casting)
             {
+                RecallRendererSwitch.Instance.fadingPassTime += Time.deltaTime;
+
                 if (this.trailInstances.TryGetValue(this.abilityInstance.recallable, out Trail trail))
                 {
                     trail.Consume(this.abilityInstance.frameCount);
@@ -142,7 +150,7 @@ namespace AillieoTech.Game.Views
                     trail.LoadData(recallable, true);
                 }
 
-                this.RemoveRenderingLayerMask(recallable.gameObject, Consts.highlightMask);
+                Utils.RemoveRenderingLayerMask(recallable.gameObject, Consts.highlightMask);
             }
         }
 
@@ -155,25 +163,7 @@ namespace AillieoTech.Game.Views
                     trail.LoadData(recallable, false);
                 }
 
-                this.RemoveRenderingLayerMask(recallable.gameObject, Consts.highlightMask);
-            }
-        }
-
-        private void AddRenderingLayerMask(GameObject go, int renderingLayerMask)
-        {
-            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
-            foreach (var r in renderers)
-            {
-                r.renderingLayerMask |= (uint)(1 << renderingLayerMask);
-            }
-        }
-
-        private void RemoveRenderingLayerMask(GameObject go, int renderingLayerMask)
-        {
-            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
-            foreach (var r in renderers)
-            {
-                r.renderingLayerMask &= (uint)(~(1 << renderingLayerMask));
+                Utils.AddRenderingLayerMask(recallable.gameObject, Consts.highlightMask);
             }
         }
     }

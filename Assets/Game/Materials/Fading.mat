@@ -29,7 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Distortion: 1
-    - _FadeValue: 0.42
+    - _FadeValue: 5.3480134
     m_Colors:
-    - _Color: {r: 1.7411011, g: 1.7411011, b: 1.7411011, a: 0.30588236}
+    - _Color: {r: 1.7411011, g: 1.7411011, b: 1.7411011, a: 0.40392157}
   m_BuildTextureStacks: []

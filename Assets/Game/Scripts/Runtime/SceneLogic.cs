@@ -76,7 +76,7 @@ namespace AillieoTech.Game
         {
             foreach (var go in this.managedObjects)
             {
-                if (go.transform.position.y < -1000)
+                if (go.transform.position.y < -500)
                 {
                     this.removeBuffer.Add(go);
                 }

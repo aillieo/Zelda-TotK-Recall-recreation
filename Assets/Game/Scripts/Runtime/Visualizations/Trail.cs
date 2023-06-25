@@ -5,6 +5,11 @@ namespace AillieoTech.Game.Views
 
     public class Trail : MonoBehaviour
     {
+        private static readonly float headLength = 3f;
+        private static readonly float headWidth = 3f;
+        private static readonly float bodyWidth = 0.5f;
+        private static readonly float widthCurveFix = 0.001f;
+
         private readonly Stack<Trace> traces = new Stack<Trace>();
 
         [SerializeField]
@@ -58,7 +63,10 @@ namespace AillieoTech.Game.Views
 
                 this.arrowBody.positionCount = this.rawPositionCount;
                 this.arrowBody.SetPositions(this.rawPositions);
-                this.arrowBody.Simplify(0.1f);
+                this.CreateArrowHead();
+
+                // todo
+                // this.arrowBody.Simplify(0.1f);
 
                 // update traces
                 var distanceAccumulated = 0f;
@@ -115,7 +123,10 @@ namespace AillieoTech.Game.Views
 
             this.arrowBody.positionCount = positionCount;
             this.arrowBody.SetPositions(this.rawPositions);
-            this.arrowBody.Simplify(0.1f);
+            this.CreateArrowHead();
+
+            // todo
+            // this.arrowBody.Simplify(0.1f);
 
             // update traces
             if (this.traces.Count > 0)
@@ -137,6 +148,18 @@ namespace AillieoTech.Game.Views
             }
 
             this.traces.Clear();
+        }
+
+        private void CreateArrowHead()
+        {
+            var length = Utils.GetTotalLength(this.arrowBody);
+            var headPercent = headLength / length;
+            headPercent = Mathf.Clamp(headPercent, widthCurveFix, 1 - widthCurveFix);
+            this.arrowBody.widthCurve = new AnimationCurve(
+                new Keyframe(0, 0f),
+                new Keyframe(headPercent - widthCurveFix, headWidth),
+                new Keyframe(headPercent + widthCurveFix, bodyWidth),
+                new Keyframe(1, bodyWidth));
         }
 
         private GameObject CreateTrace(GameObject template, FrameData frameData, bool createFromRecallable)

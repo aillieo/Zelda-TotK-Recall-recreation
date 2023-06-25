@@ -6,7 +6,7 @@ namespace AillieoTech.Game.Rendering
     using UnityEngine.Rendering.Universal;
 
     [System.Serializable]
-    public class OutlineMaskSettings
+    public class HighlightSettings
     {
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
 
@@ -20,30 +20,21 @@ namespace AillieoTech.Game.Rendering
         public int overrideMaterialPassIndex;
     }
 
-    public class OutlineMaskPass : ScriptableRenderPass
+    public class HighlightPass : ScriptableRenderPass
     {
         private static readonly List<ShaderTagId> shaderTagIdList = new List<ShaderTagId>(Consts.defaultShaderTagIdList);
 
         private readonly string tag;
 
-        private readonly OutlineMaskSettings settings;
+        private readonly HighlightSettings settings;
 
         private FilteringSettings filteringSettings;
 
-        public OutlineMaskPass(OutlineMaskSettings settings)
+        public HighlightPass(HighlightSettings settings)
         {
             this.settings = settings;
-            this.tag = nameof(OutlineMaskPass);
+            this.tag = nameof(HighlightPass);
             this.filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
-        }
-
-        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
-        {
-            RenderTextureDescriptor blitTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-            blitTargetDescriptor.depthBufferBits = 0;
-            blitTargetDescriptor.colorFormat = RenderTextureFormat.R16;
-
-            cmd.GetTemporaryRT(Consts.outlineMaskRTId, blitTargetDescriptor, FilterMode.Point);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -59,22 +50,7 @@ namespace AillieoTech.Game.Rendering
 
             CommandBuffer cmd = CommandBufferPool.Get(this.tag);
 
-            var renderer = renderingData.cameraData.renderer;
-            var source = renderer.cameraColorTarget;
-
-            var destination = new RenderTargetIdentifier(Consts.outlineMaskRTId);
-            cmd.SetRenderTarget(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            cmd.ClearRenderTarget(false, true, Color.clear);
-
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
-
             context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref this.filteringSettings);
-
-            context.ExecuteCommandBuffer(cmd);
-
-            cmd.Clear();
-            cmd.SetRenderTarget(source, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
             context.ExecuteCommandBuffer(cmd);
 
             CommandBufferPool.Release(cmd);

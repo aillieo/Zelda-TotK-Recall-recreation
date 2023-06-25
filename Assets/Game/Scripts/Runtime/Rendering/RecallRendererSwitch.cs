@@ -7,6 +7,7 @@ namespace AillieoTech.Game.Rendering
         public bool enableScanning = false;
 
         public bool enableFading = false;
+        public float fadingPassTime = 0f;
 
         public bool enableOutline = false;
 

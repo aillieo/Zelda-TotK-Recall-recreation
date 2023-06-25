@@ -16,6 +16,14 @@ MonoBehaviour:
   scanningSettings:
     renderPassEvent: 300
     blitMaterial: {fileID: 2100000, guid: 29cf10e262c41e44faedce62870a4844, type: 2}
+  highlightSettings:
+    renderPassEvent: 300
+    layerMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    renderingLayerMask: 4
+    overrideMaterial: {fileID: 2100000, guid: b440d1b19029d8743afa155d46d22ee7, type: 2}
+    overrideMaterialPassIndex: 0
   outlineMaskSettings:
     renderPassEvent: 400
     layerMask:
@@ -28,7 +36,7 @@ MonoBehaviour:
     renderPassEvent: 400
     blitMaterial: {fileID: 2100000, guid: 7dddac699d5493f4eb9474db09e1ddea, type: 2}
   fadingSettings:
-    renderPassEvent: 550
+    renderPassEvent: 500
     blitMaterial: {fileID: 2100000, guid: 35fcf568d82df06499575d7c07720f50, type: 2}
 --- !u!114 &11400000
 MonoBehaviour:
