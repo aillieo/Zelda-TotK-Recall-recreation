@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="OutlinePass.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Rendering
 {
     using System;
@@ -6,7 +12,7 @@ namespace AillieoTech.Game.Rendering
     using UnityEngine.Rendering.Universal;
 
     [Serializable]
-    public class OutlineSettings
+    internal class OutlineSettings
     {
         public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
 
@@ -17,12 +23,11 @@ namespace AillieoTech.Game.Rendering
     {
         private readonly OutlineSettings settings;
 
-        private readonly string tag;
+        private readonly ProfilingSampler sampler = new ProfilingSampler(nameof(OutlinePass));
 
         public OutlinePass(OutlineSettings settings)
         {
             this.settings = settings;
-            this.tag = nameof(OutlinePass);
         }
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
@@ -31,16 +36,19 @@ namespace AillieoTech.Game.Rendering
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            CommandBuffer cmd = CommandBufferPool.Get(this.tag);
+            CommandBuffer cmd = CommandBufferPool.Get();
 
-            var renderer = renderingData.cameraData.renderer;
-            var source = new RenderTargetIdentifier(Consts.outlineMaskRTId);
-            var destination = renderer.cameraColorTarget;
+            using (new ProfilingScope(cmd, this.sampler))
+            {
+                var renderer = renderingData.cameraData.renderer;
+                var source = new RenderTargetIdentifier(Consts.outlineMaskRTId);
+                var destination = renderer.cameraColorTarget;
 
-            this.Blit(cmd, source, destination, this.settings.blitMaterial, 0);
+                this.Blit(cmd, source, destination, this.settings.blitMaterial, 0);
 
-            context.ExecuteCommandBuffer(cmd);
-            CommandBufferPool.Release(cmd);
+                context.ExecuteCommandBuffer(cmd);
+                CommandBufferPool.Release(cmd);
+            }
         }
 
         public override void FrameCleanup(CommandBuffer cmd)

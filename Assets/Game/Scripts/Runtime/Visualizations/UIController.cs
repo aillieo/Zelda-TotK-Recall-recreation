@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="UIController.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Views
 {
     using System.Collections.Generic;
@@ -6,7 +12,7 @@ namespace AillieoTech.Game.Views
     using UnityEngine.UI;
 
     [RequireComponent(typeof(RectTransform))]
-    public class UIController : MonoBehaviour
+    internal class UIController : MonoBehaviour
     {
         [SerializeField]
         private GameObject cursor;

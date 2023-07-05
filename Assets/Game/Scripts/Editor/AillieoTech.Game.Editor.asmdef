@@ -1,8 +1,8 @@
 {
-    "name": "AillieoUtils.Game.Editor",
+    "name": "AillieoTech.Game.Editor",
     "rootNamespace": "",
     "references": [
-        "AillieoUtils.Game"
+        "AillieoTech.Game"
     ],
     "includePlatforms": [
         "Editor"

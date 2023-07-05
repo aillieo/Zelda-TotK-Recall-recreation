@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="VisualizeController.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Views
 {
     using System.Collections.Generic;
@@ -5,7 +11,7 @@ namespace AillieoTech.Game.Views
     using UnityEngine;
     using UnityEngine.Assertions;
 
-    public class VisualizeController : MonoBehaviour
+    internal class VisualizeController : MonoBehaviour
     {
         private readonly Dictionary<Recallable, Trail> trailInstances = new Dictionary<Recallable, Trail>();
 
@@ -133,6 +139,14 @@ namespace AillieoTech.Game.Views
             if (RecallManager.Instance.stage == AbilityStage.Casting)
             {
                 RecallRendererSwitch.Instance.fadingPassTime += Time.deltaTime;
+                if (RecallRendererSwitch.Instance.fadingPassTime > 2f)
+                {
+                    RecallRendererSwitch.Instance.fadingPassTime = 100000f;
+                }
+
+                Vector3 position = this.abilityInstance.recallable.transform.position;
+                Vector3 screenPos = Camera.main.WorldToViewportPoint(position);
+                RecallRendererSwitch.Instance.fadingCenter = screenPos;
 
                 if (this.trailInstances.TryGetValue(this.abilityInstance.recallable, out Trail trail))
                 {

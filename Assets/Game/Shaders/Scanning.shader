@@ -3,10 +3,10 @@ Shader "AillieoTech/Scanning"
     Properties {
         _MainTex("Base (RGB)", 2D) = "white" {}
         _NoiseTex("Noise Texture", 2D) = "white" {}
-        [HDR]_ScanLineColor("_ScanLineColor", color) = (1,1,1,1)
-        _ScanSpeed("_ScanSpeed", float) = 0
+        [HDR]_ScanLineColor("ScanLineColor", color) = (1,1,1,1)
+        _ScanSpeed("ScanSpeed", float) = 0
         _ScanLineWidth("ScanLineWidth", Range(0, 10)) = 1
-        _ScanLineInterval("_ScanLineInterval", Range(1, 30)) = 30
+        _ScanLineInterval("ScanLineInterval", Range(1, 30)) = 30
         _ScanLightStrength("ScanLightStrength", float) = 1
         _Distortion("Distortion", Range(0, 1)) = 0.1
     }

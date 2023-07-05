@@ -1,9 +1,15 @@
+// -----------------------------------------------------------------------
+// <copyright file="RecallRendererFeature.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Rendering
 {
     using UnityEngine;
     using UnityEngine.Rendering.Universal;
 
-    public class RecallRendererFeature : ScriptableRendererFeature
+    internal class RecallRendererFeature : ScriptableRendererFeature
     {
         [SerializeField]
         private ScanningSettings scanningSettings;
@@ -18,20 +24,20 @@ namespace AillieoTech.Game.Rendering
         private OutlineMaskPass outlineMaskPass;
 
         [SerializeField]
-        private OutlineSettings outlineSettings;
-        private OutlinePass outlinePass;
-
-        [SerializeField]
         private FadingSettings fadingSettings;
         private FadingPass fadingPass;
+
+        [SerializeField]
+        private OutlineSettings outlineSettings;
+        private OutlinePass outlinePass;
 
         public override void Create()
         {
             this.scanningPass = new ScanningPass(this.scanningSettings);
             this.highlightPass = new HighlightPass(this.highlightSettings);
+            this.fadingPass = new FadingPass(this.fadingSettings);
             this.outlineMaskPass = new OutlineMaskPass(this.outlineMaskSettings);
             this.outlinePass = new OutlinePass(this.outlineSettings);
-            this.fadingPass = new FadingPass(this.fadingSettings);
         }
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
@@ -48,6 +54,14 @@ namespace AillieoTech.Game.Rendering
                 renderer.EnqueuePass(this.highlightPass);
             }
 
+            if (RecallRendererSwitch.Instance.enableFading)
+            {
+                this.fadingPass.renderPassEvent = this.fadingSettings.renderPassEvent;
+                this.fadingPass.fadingPassTime = RecallRendererSwitch.Instance.fadingPassTime;
+                this.fadingPass.fadingCenter = RecallRendererSwitch.Instance.fadingCenter;
+                renderer.EnqueuePass(this.fadingPass);
+            }
+
             if (RecallRendererSwitch.Instance.enableOutline)
             {
                 this.outlineMaskPass.renderPassEvent = this.outlineMaskSettings.renderPassEvent;
@@ -55,13 +69,6 @@ namespace AillieoTech.Game.Rendering
 
                 this.outlinePass.renderPassEvent = this.outlineSettings.renderPassEvent;
                 renderer.EnqueuePass(this.outlinePass);
-            }
-
-            if (RecallRendererSwitch.Instance.enableFading)
-            {
-                this.fadingPass.renderPassEvent = this.fadingSettings.renderPassEvent;
-                this.fadingPass.fadingPassTime = RecallRendererSwitch.Instance.fadingPassTime;
-                renderer.EnqueuePass(this.fadingPass);
             }
         }
     }

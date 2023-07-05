@@ -29,8 +29,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Exponent: 7.68
-    - _Power: 1
+    - _Power: 3
     - _Speed: 1.05
+    - _Threshold: 12
+    - _ThresholdFactor: 0.5
     m_Colors:
     - _Color: {r: 0.99508846, g: 1, b: 0, a: 0.4745098}
   m_BuildTextureStacks: []

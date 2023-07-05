@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="RenderingLayerMaskAttributeDrawer.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Rendering.Editor
 {
     using System.Linq;

@@ -1,8 +1,14 @@
+// -----------------------------------------------------------------------
+// <copyright file="CameraController.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Input
 {
     using UnityEngine;
 
-    public class CameraController : MonoBehaviour
+    internal class CameraController : MonoBehaviour
     {
         [SerializeField]
         private new Camera camera;

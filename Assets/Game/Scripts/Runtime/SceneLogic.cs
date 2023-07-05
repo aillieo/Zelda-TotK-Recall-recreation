@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="SceneLogic.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game
 {
     using System;
@@ -5,7 +11,7 @@ namespace AillieoTech.Game
     using UnityEngine;
     using Random = UnityEngine.Random;
 
-    public class SceneLogic : MonoBehaviour
+    internal class SceneLogic : MonoBehaviour
     {
         private readonly Dictionary<int, float> timers = new Dictionary<int, float>();
 
@@ -34,7 +40,7 @@ namespace AillieoTech.Game
                 return;
             }
 
-            if (this.managedObjects.Count > this.maxObjectCount)
+            if (this.managedObjects.Count >= this.maxObjectCount)
             {
                 return;
             }
@@ -92,6 +98,11 @@ namespace AillieoTech.Game
 
                 this.removeBuffer.Clear();
             }
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.DrawWireCube(this.spawnArea.center, this.spawnArea.size);
         }
 
         [Serializable]

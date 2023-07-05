@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="FrameData.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game
 {
     using UnityEngine;
@@ -13,7 +19,7 @@ namespace AillieoTech.Game
             this.rotation = transform.rotation;
         }
 
-        public void ApplyTo(Transform transform)
+        internal void ApplyTo(Transform transform)
         {
             transform.SetPositionAndRotation(this.position, this.rotation);
         }

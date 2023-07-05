@@ -1,10 +1,20 @@
+// -----------------------------------------------------------------------
+// <copyright file="Utils.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game
 {
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
 
     public static class Utils
     {
+        private static readonly List<Renderer> rendererCompBuffer = new List<Renderer>();
+        private static Vector3[] positionBuffer = Array.Empty<Vector3>();
+
         public static void SetLayerRecursively(GameObject gameObject, int layer)
         {
             gameObject.layer = layer;
@@ -14,8 +24,6 @@ namespace AillieoTech.Game
                 SetLayerRecursively(child.gameObject, layer);
             }
         }
-
-        private static readonly List<Renderer> rendererCompBuffer = new List<Renderer>();
 
         public static void AddRenderingLayerMask(GameObject go, int renderingLayerMask)
         {
@@ -81,6 +89,20 @@ namespace AillieoTech.Game
             }
 
             return totalLength;
+        }
+
+        public static void InsertPosition(LineRenderer lineRenderer, int index, Vector3 position)
+        {
+            if (positionBuffer.Length < lineRenderer.positionCount + 1)
+            {
+                Array.Resize(ref positionBuffer, lineRenderer.positionCount + 1);
+            }
+
+            lineRenderer.GetPositions(positionBuffer);
+            Array.Copy(positionBuffer, index, positionBuffer, index + 1, lineRenderer.positionCount - index);
+            positionBuffer[index] = position;
+            lineRenderer.positionCount++;
+            lineRenderer.SetPositions(positionBuffer);
         }
     }
 }

@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="FixedUpdateRunner.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game
 {
     using System;

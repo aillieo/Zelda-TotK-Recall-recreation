@@ -4,7 +4,10 @@ Shader "AillieoTech/Highlight"
     {
         _Color("Color", color) = (1,1,1,1)
         _NoiseTex("Noise Texture", 2D) = "white" {}
-        _Speed("_Speed", Range(1, 10)) = 5
+        _Speed("Speed", Range(1, 10)) = 5
+        _Power("Power", Range(1, 10)) = 5
+        _Threshold("Threshold", Range(0.5, 50)) = 3
+        _ThresholdFactor("ThresholdFactor", Range(0, 1)) = 0.5
         
     }
 
@@ -46,6 +49,9 @@ Shader "AillieoTech/Highlight"
             float4 _Color;
             float _Speed;
             half4 _NoiseTex_ST;
+            float _Power;
+            float _Threshold;
+            float _ThresholdFactor;
             CBUFFER_END
 
             TEXTURE2D(_NoiseTex);
@@ -65,9 +71,9 @@ Shader "AillieoTech/Highlight"
             {
                 float noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, i.uv).r;
 
-                noise = pow(noise, 3);
+                noise = pow(noise, _Power);
 
-                float c1 = distance(i.positionOS.z, 0) - _Time.y * _Speed;
+                float c1 = distance(i.positionWS.xy, float2(0, 0)) - _Time.y * _Speed;
                 c1 = c1 + noise * 20;
 
                 float c2 = distance(i.positionWS.z, 0) - _Time.y * _Speed;
@@ -75,14 +81,13 @@ Shader "AillieoTech/Highlight"
 
                 float c = c1 + c2;
 
-                c = fmod(c, 3);
+                c = fmod(c, _Threshold);
                 if (c < 0)
                 {
                     c = c + 3;
                 }
     
-                float threshold = 3;
-                float v = smoothstep(threshold - 1.5, threshold, c);
+                float v = 0.4 + 0.6 * smoothstep(_Threshold * _ThresholdFactor, _Threshold, c);
                 float4 final = _Color * v;
                 return final;
             }

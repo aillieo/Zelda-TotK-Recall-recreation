@@ -1,12 +1,19 @@
+// -----------------------------------------------------------------------
+// <copyright file="HighlightPass.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Rendering
 {
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Rendering;
     using UnityEngine.Rendering.Universal;
 
-    [System.Serializable]
-    public class HighlightSettings
+    [Serializable]
+    internal class HighlightSettings
     {
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
 
@@ -20,11 +27,11 @@ namespace AillieoTech.Game.Rendering
         public int overrideMaterialPassIndex;
     }
 
-    public class HighlightPass : ScriptableRenderPass
+    internal class HighlightPass : ScriptableRenderPass
     {
         private static readonly List<ShaderTagId> shaderTagIdList = new List<ShaderTagId>(Consts.defaultShaderTagIdList);
 
-        private readonly string tag;
+        private readonly ProfilingSampler sampler = new ProfilingSampler(nameof(HighlightPass));
 
         private readonly HighlightSettings settings;
 
@@ -33,7 +40,6 @@ namespace AillieoTech.Game.Rendering
         public HighlightPass(HighlightSettings settings)
         {
             this.settings = settings;
-            this.tag = nameof(HighlightPass);
             this.filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
         }
 
@@ -48,12 +54,15 @@ namespace AillieoTech.Game.Rendering
             this.filteringSettings.layerMask = this.settings.layerMask;
             this.filteringSettings.renderingLayerMask = this.settings.renderingLayerMask;
 
-            CommandBuffer cmd = CommandBufferPool.Get(this.tag);
+            CommandBuffer cmd = CommandBufferPool.Get();
 
-            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref this.filteringSettings);
-            context.ExecuteCommandBuffer(cmd);
+            using (new ProfilingScope(cmd, this.sampler))
+            {
+                context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref this.filteringSettings);
+                context.ExecuteCommandBuffer(cmd);
 
-            CommandBufferPool.Release(cmd);
+                CommandBufferPool.Release(cmd);
+            }
         }
     }
 }

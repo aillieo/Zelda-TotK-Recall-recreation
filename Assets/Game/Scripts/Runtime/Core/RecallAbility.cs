@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="RecallAbility.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game
 {
     using System.Collections.Generic;
@@ -7,7 +13,7 @@ namespace AillieoTech.Game
         public readonly Recallable recallable;
         private readonly Stack<FrameData> frames = new Stack<FrameData>();
 
-        public RecallAbility(Recallable target)
+        internal RecallAbility(Recallable target)
         {
             var buffer = new List<FrameData>();
             RecallManager.Instance.TryGetFrames(target, buffer);
@@ -23,7 +29,7 @@ namespace AillieoTech.Game
 
         public int frameCount { get; private set; }
 
-        public int Tick()
+        internal int Tick()
         {
             if (this.frames.Count > 0)
             {
@@ -34,7 +40,7 @@ namespace AillieoTech.Game
             return this.frameCount++;
         }
 
-        public void Stop()
+        internal void Stop()
         {
             this.recallable.state = Recallable.State.Forward;
         }

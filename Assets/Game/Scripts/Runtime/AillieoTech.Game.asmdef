@@ -1,5 +1,5 @@
 {
-    "name": "AillieoUtils.Game",
+    "name": "AillieoTech.Game",
     "rootNamespace": "",
     "references": [
         "Unity.RenderPipelines.Core.Runtime",

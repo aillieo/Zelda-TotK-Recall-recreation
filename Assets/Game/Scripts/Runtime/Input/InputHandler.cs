@@ -1,8 +1,14 @@
+// -----------------------------------------------------------------------
+// <copyright file="InputHandler.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Input
 {
     using UnityEngine;
 
-    public class InputHandler : MonoBehaviour
+    internal class InputHandler : MonoBehaviour
     {
         private void Update()
         {

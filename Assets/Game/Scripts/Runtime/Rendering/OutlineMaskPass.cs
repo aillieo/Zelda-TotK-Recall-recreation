@@ -1,12 +1,19 @@
+// -----------------------------------------------------------------------
+// <copyright file="OutlineMaskPass.cs" company="AillieoTech">
+// Copyright (c) AillieoTech. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace AillieoTech.Game.Rendering
 {
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Rendering;
     using UnityEngine.Rendering.Universal;
 
-    [System.Serializable]
-    public class OutlineMaskSettings
+    [Serializable]
+    internal class OutlineMaskSettings
     {
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
 
@@ -20,11 +27,11 @@ namespace AillieoTech.Game.Rendering
         public int overrideMaterialPassIndex;
     }
 
-    public class OutlineMaskPass : ScriptableRenderPass
+    internal class OutlineMaskPass : ScriptableRenderPass
     {
         private static readonly List<ShaderTagId> shaderTagIdList = new List<ShaderTagId>(Consts.defaultShaderTagIdList);
 
-        private readonly string tag;
+        private readonly ProfilingSampler sampler = new ProfilingSampler(nameof(OutlineMaskPass));
 
         private readonly OutlineMaskSettings settings;
 
@@ -33,8 +40,7 @@ namespace AillieoTech.Game.Rendering
         public OutlineMaskPass(OutlineMaskSettings settings)
         {
             this.settings = settings;
-            this.tag = nameof(OutlineMaskPass);
-            this.filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
+            this.filteringSettings = new FilteringSettings(RenderQueueRange.all);
         }
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
@@ -57,27 +63,31 @@ namespace AillieoTech.Game.Rendering
             this.filteringSettings.layerMask = this.settings.layerMask;
             this.filteringSettings.renderingLayerMask = this.settings.renderingLayerMask;
 
-            CommandBuffer cmd = CommandBufferPool.Get(this.tag);
+            CommandBuffer cmd = CommandBufferPool.Get();
 
-            var renderer = renderingData.cameraData.renderer;
-            var source = renderer.cameraColorTarget;
+            using (new ProfilingScope(cmd, this.sampler))
+            {
+                var renderer = renderingData.cameraData.renderer;
+                var source = renderer.cameraColorTarget;
 
-            var destination = new RenderTargetIdentifier(Consts.outlineMaskRTId);
-            cmd.SetRenderTarget(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            cmd.ClearRenderTarget(false, true, Color.clear);
+                var destination = new RenderTargetIdentifier(Consts.outlineMaskRTId);
+                var depthTexture = new RenderTargetIdentifier(Consts.depthTexId);
+                cmd.SetRenderTarget(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, depthTexture, RenderBufferLoadAction.Load, RenderBufferStoreAction.DontCare);
+                cmd.ClearRenderTarget(false, true, Color.clear);
 
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
 
-            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref this.filteringSettings);
+                context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref this.filteringSettings);
 
-            context.ExecuteCommandBuffer(cmd);
+                context.ExecuteCommandBuffer(cmd);
 
-            cmd.Clear();
-            cmd.SetRenderTarget(source, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
-            context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
+                cmd.SetRenderTarget(source, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                context.ExecuteCommandBuffer(cmd);
 
-            CommandBufferPool.Release(cmd);
+                CommandBufferPool.Release(cmd);
+            }
         }
     }
 }
