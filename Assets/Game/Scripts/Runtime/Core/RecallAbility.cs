@@ -12,6 +12,7 @@ namespace AillieoTech.Game
     {
         public readonly Recallable recallable;
         private readonly Stack<FrameData> frames = new Stack<FrameData>();
+        private FrameData currentFrame;
 
         internal RecallAbility(Recallable target)
         {
@@ -25,6 +26,7 @@ namespace AillieoTech.Game
 
             this.recallable = target;
             this.recallable.state = Recallable.State.Backward;
+            this.currentFrame = new FrameData(target.rigidbody);
         }
 
         public int frameCount { get; private set; }
@@ -34,8 +36,10 @@ namespace AillieoTech.Game
             if (this.frames.Count > 0)
             {
                 FrameData top = this.frames.Pop();
-                top.ApplyTo(this.recallable.transform);
+                this.currentFrame = top;
             }
+
+            this.currentFrame.ApplyTo(this.recallable.rigidbody);
 
             return this.frameCount++;
         }

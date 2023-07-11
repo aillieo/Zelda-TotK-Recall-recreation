@@ -23,7 +23,7 @@ namespace AillieoTech.Game
 
         private static RecallManager instance;
 
-        private readonly Dictionary<Recallable, Queue<FrameData>> managedRecallables = new Dictionary<Recallable, Queue<FrameData>>();
+        private readonly Dictionary<Recallable, MotionRecord> managedRecallables = new Dictionary<Recallable, MotionRecord>();
 
         private RecallAbility currentAbility;
         private Recallable potentialTarget;
@@ -104,7 +104,7 @@ namespace AillieoTech.Game
 
             Recallable currentTarget = this.potentialTarget;
 
-            if (currentTarget != null && this.managedRecallables.TryGetValue(currentTarget, out Queue<FrameData> frames))
+            if (currentTarget != null && this.managedRecallables.TryGetValue(currentTarget, out MotionRecord record))
             {
                 this.InternalEndPreview();
 
@@ -120,7 +120,7 @@ namespace AillieoTech.Game
                     Debug.LogException(e);
                 }
 
-                frames.Clear();
+                record.Clear();
                 return true;
             }
 
@@ -145,7 +145,7 @@ namespace AillieoTech.Game
 
         internal void Register(Recallable recallable)
         {
-            this.managedRecallables.Add(recallable, new Queue<FrameData>());
+            this.managedRecallables.Add(recallable, new MotionRecord());
         }
 
         internal void Unregister(Recallable recallable)
@@ -155,9 +155,9 @@ namespace AillieoTech.Game
 
         internal bool TryGetFrames(Recallable recallable, List<FrameData> toFill)
         {
-            if (this.managedRecallables.TryGetValue(recallable, out Queue<FrameData> frames))
+            if (this.managedRecallables.TryGetValue(recallable, out MotionRecord record))
             {
-                toFill.AddRange(frames);
+                toFill.AddRange(record.frames);
                 return true;
             }
 
@@ -267,18 +267,13 @@ namespace AillieoTech.Game
                 foreach (var pair in this.managedRecallables)
                 {
                     Recallable recallable = pair.Key;
-                    Queue<FrameData> frames = pair.Value;
+                    MotionRecord record = pair.Value;
 
                     switch (recallable.state)
                     {
                         case Recallable.State.Forward:
-                            var frameData = new FrameData(recallable.transform);
-                            frames.Enqueue(frameData);
-                            while (frames.Count > maxFrameCount)
-                            {
-                                frames.Dequeue();
-                            }
-
+                            var frameData = new FrameData(recallable.rigidbody);
+                            record.Append(frameData);
                             break;
                     }
                 }

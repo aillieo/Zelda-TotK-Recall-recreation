@@ -6,6 +6,7 @@
 
 namespace AillieoTech.Game
 {
+    using System.Collections.Generic;
     using UnityEngine;
 
     [DisallowMultipleComponent]
@@ -35,7 +36,7 @@ namespace AillieoTech.Game
             }
         }
 
-        private new Rigidbody rigidbody
+        internal new Rigidbody rigidbody
         {
             get
             {
@@ -61,19 +62,37 @@ namespace AillieoTech.Game
 
         private void OnStateChanged()
         {
+            var list = new List<MotionDriverHandler>();
+
             switch (this.state)
             {
                 case State.Forward:
-                    this.rigidbody.isKinematic = false;
-                    this.rigidbody.detectCollisions = true;
+                    this.gameObject.GetComponents(list);
+                    foreach (var c in list)
+                    {
+                        c.InvokeRestoreMotionDrivers();
+                    }
+
+                    this.rigidbody.velocity = default;
+                    this.rigidbody.angularVelocity = default;
+
                     break;
                 case State.Backward:
-                    this.rigidbody.isKinematic = true;
-                    this.rigidbody.detectCollisions = true;
+                    this.gameObject.GetComponents(list);
+                    foreach (var c in list)
+                    {
+                        c.InvokeDisableMotionDrivers();
+                    }
+
+                    this.rigidbody.velocity = default;
+                    this.rigidbody.angularVelocity = default;
+
                     break;
                 case State.Paused:
                     break;
             }
+
+            list.Clear();
         }
     }
 }
