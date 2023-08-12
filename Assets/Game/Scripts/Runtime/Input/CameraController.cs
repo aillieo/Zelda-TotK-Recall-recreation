@@ -27,7 +27,7 @@ namespace AillieoTech.Game.Input
         {
             Cursor.lockState = CursorLockMode.Locked;
             this.rotationX = this.camera.transform.eulerAngles.y;
-            this.rotationY = this.camera.transform.eulerAngles.x;
+            this.rotationY = -this.camera.transform.eulerAngles.x;
         }
 
         private void LateUpdate()

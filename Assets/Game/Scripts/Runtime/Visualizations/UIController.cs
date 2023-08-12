@@ -101,6 +101,7 @@ namespace AillieoTech.Game.Views
                 var max = RecallManager.maxFrameCount;
                 var frame = this.abilityInstance.frameCount;
                 var proportion = 1f - ((float)frame / max);
+                proportion = Mathf.Round(proportion * 60) / 60f;
                 this.progressImage.fillAmount = proportion;
 
                 Vector3 screenPoint = Utils.WorldToScreenPointSafe(Camera.main, this.abilityInstance.recallable.transform.position);

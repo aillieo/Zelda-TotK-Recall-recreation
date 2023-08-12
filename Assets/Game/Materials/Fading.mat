@@ -33,6 +33,6 @@ Material:
     - _NoiseHighScale: 0.15
     - _NoiseLowScale: 0.5
     m_Colors:
-    - _Center: {r: -0.7064036, g: 0.60690254, b: 106.60809, a: 0}
+    - _Center: {r: 0.36226168, g: 0.55727273, b: 306.63977, a: 0}
     - _Color: {r: 1.7411011, g: 1.7411011, b: 1.7411011, a: 0.40392157}
   m_BuildTextureStacks: []
